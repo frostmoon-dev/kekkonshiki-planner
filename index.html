@@ -1,0 +1,649 @@
+<title>Kekkonshiki Planner</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Marcellus&family=Figtree:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: one calm column; a songket "pucuk rebung" band marks each chapter of the plan. */
+:root {
+  --bg: #F5F6F1;
+  --surface: #FFFFFF;
+  --ink: #1D2824;
+  --muted: #5B6862;
+  --line: #DCE0D6;
+  --gold: #9A7420;
+  --gold-soft: #EFE3C4;
+  --plum: #6E2A3E;
+  --good: #2F7A4F;
+  --warn: #A86B10;
+  --bad: #B23A3A;
+  --chip: #EEF0E9;
+  --display: "Marcellus", "Iowan Old Style", Georgia, serif;
+  --body: "Figtree", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --ribbon-1: #9A7420;
+  --ribbon-2: #6E2A3E;
+  --ribbon-3: #EFE3C4;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #121815; --surface: #1A221E; --ink: #E7EBE4; --muted: #A3AFA8; --line: #2D3832;
+    --gold: #D8B25A; --gold-soft: #3A3220; --plum: #D98AA0; --good: #6CC592; --warn: #E2A84B; --bad: #EC7C7C; --chip: #232D28;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #121815; --surface: #1A221E; --ink: #E7EBE4; --muted: #A3AFA8; --line: #2D3832;
+  --gold: #D8B25A; --gold-soft: #3A3220; --plum: #D98AA0; --good: #6CC592; --warn: #E2A84B; --bad: #EC7C7C; --chip: #232D28;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 16px; line-height: 1.55;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 0 48px;
+}
+.wrap { max-width: 980px; margin: 0 auto; display: grid; gap: 40px; }
+h1, h2, h3 { font-family: var(--display); font-weight: 400; text-wrap: balance; margin: 0; line-height: 1.2; }
+h1 { font-size: clamp(2rem, 5vw, 3rem); }
+h2 { font-size: 1.75rem; }
+h3 { font-size: 1.15rem; }
+p { margin: 0; max-width: 65ch; }
+.eyebrow { font-size: .75rem; letter-spacing: .12em; text-transform: uppercase; color: var(--gold); font-weight: 600; }
+.muted { color: var(--muted); }
+.small { font-size: .875rem; }
+.num { font-variant-numeric: tabular-nums; }
+
+/* songket band */
+.songket {
+  height: 14px; border-radius: 2px;
+  background:
+    linear-gradient(135deg, var(--ribbon-1) 25%, transparent 25%) 0 0 / 14px 14px,
+    linear-gradient(225deg, var(--ribbon-1) 25%, transparent 25%) 0 0 / 14px 14px,
+    var(--ribbon-3);
+  border-top: 2px solid var(--ribbon-2); border-bottom: 2px solid var(--ribbon-2);
+}
+
+header { display: grid; gap: 16px; padding-top: 32px; }
+header .lede { font-size: 1.05rem; color: var(--muted); }
+.summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
+.tile { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; display: grid; gap: 2px; min-width: 0; }
+.tile .k { font-size: .8rem; color: var(--muted); }
+.tile .v { font-family: var(--display); font-size: 1.6rem; font-variant-numeric: tabular-nums; }
+.tile .s { font-size: .8rem; color: var(--muted); }
+
+nav.toc { display: flex; flex-wrap: wrap; gap: 8px; }
+nav.toc a { color: var(--ink); text-decoration: none; background: var(--chip); border-radius: 999px; padding: 6px 14px; font-size: .9rem; }
+nav.toc a:hover, nav.toc a:focus-visible { background: var(--gold-soft); outline: none; }
+
+section { display: grid; gap: 18px; scroll-margin-top: 16px; }
+.sec-head { display: grid; gap: 6px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 18px; min-width: 0; }
+
+/* timeline */
+.timeline { display: grid; gap: 0; border-left: 2px solid var(--line); margin-left: 8px; }
+.step { position: relative; padding: 0 0 20px 22px; display: grid; gap: 4px; }
+.step::before { content: ""; position: absolute; left: -7px; top: 6px; width: 12px; height: 12px; border-radius: 50%; background: var(--surface); border: 2px solid var(--gold); }
+.step .when { font-size: .8rem; font-weight: 600; color: var(--gold); letter-spacing: .04em; }
+.step ul { margin: 0; padding-left: 18px; }
+.step li { margin: 2px 0; }
+.adat { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; }
+.adat .card { padding: 14px; display: grid; gap: 4px; }
+.adat b { font-family: var(--display); font-weight: 400; font-size: 1.1rem; }
+
+/* controls */
+.seg { display: inline-flex; background: var(--chip); border-radius: 999px; padding: 3px; gap: 2px; flex-wrap: wrap; }
+.seg button { border: 0; background: transparent; color: var(--ink); font: inherit; font-size: .9rem; padding: 6px 14px; border-radius: 999px; cursor: pointer; }
+.seg button[aria-pressed="true"] { background: var(--surface); box-shadow: 0 1px 2px rgba(0,0,0,.12); font-weight: 600; }
+.seg button:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+.row { display: flex; flex-wrap: wrap; gap: 12px; align-items: end; }
+label.f { display: grid; gap: 4px; font-size: .85rem; color: var(--muted); min-width: 0; }
+input, select { font: inherit; color: var(--ink); background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 7px 10px; min-width: 0; }
+input[type="number"] { font-variant-numeric: tabular-nums; }
+.btn { font: inherit; font-size: .9rem; border: 1px solid var(--line); background: var(--surface); color: var(--ink); border-radius: 8px; padding: 7px 14px; cursor: pointer; }
+.btn:hover { background: var(--chip); }
+
+/* budget table */
+.tablebox { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); }
+table { border-collapse: collapse; width: 100%; min-width: 640px; font-size: .92rem; }
+th, td { text-align: left; padding: 9px 12px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+th { font-size: .75rem; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); font-weight: 600; background: var(--chip); }
+td.r, th.r { text-align: right; font-variant-numeric: tabular-nums; }
+td input { width: 110px; text-align: right; }
+tr.group td { background: var(--chip); font-weight: 600; font-size: .8rem; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+tfoot td { font-weight: 700; border-bottom: 0; }
+tfoot tr.grand td { font-family: var(--display); font-weight: 400; font-size: 1.35rem; }
+.tag { display: inline-block; font-size: .7rem; font-weight: 600; letter-spacing: .04em; padding: 2px 8px; border-radius: 999px; white-space: nowrap; }
+.tag.src { background: color-mix(in srgb, var(--good) 16%, transparent); color: var(--good); }
+.tag.est { background: color-mix(in srgb, var(--warn) 18%, transparent); color: var(--warn); }
+.tag.ver { background: color-mix(in srgb, var(--bad) 14%, transparent); color: var(--bad); }
+.note { font-size: .8rem; color: var(--muted); }
+.bars { display: grid; gap: 6px; }
+.bar { display: grid; grid-template-columns: 150px 1fr 90px; gap: 10px; align-items: center; font-size: .85rem; }
+.bar .track { height: 10px; background: var(--chip); border-radius: 5px; overflow: hidden; }
+.bar .fill { height: 100%; background: var(--gold); border-radius: 5px; }
+.bar .amt { text-align: right; font-variant-numeric: tabular-nums; }
+
+/* palettes */
+.palettes { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; }
+.pal { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; display: grid; grid-template-rows: auto 1fr; cursor: pointer; text-align: left; font: inherit; color: inherit; padding: 0; }
+.pal[aria-pressed="true"] { border-color: var(--gold); box-shadow: 0 0 0 2px var(--gold); }
+.swatches { display: grid; grid-template-columns: 2fr 1.4fr 1fr 1fr .7fr; height: 72px; }
+.swatches span { display: block; }
+.pal .body { padding: 14px; display: grid; gap: 8px; align-content: start; }
+.pal .name { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; }
+.pal .name b { font-family: var(--display); font-weight: 400; font-size: 1.15rem; }
+.pal dl { margin: 0; display: grid; grid-template-columns: auto 1fr; gap: 3px 10px; font-size: .84rem; }
+.pal dt { color: var(--muted); }
+.pal dd { margin: 0; }
+.hexes { display: flex; flex-wrap: wrap; gap: 4px; }
+.hexes code { font-size: .72rem; background: var(--chip); padding: 1px 6px; border-radius: 4px; }
+
+/* weight */
+.wgrid { display: grid; grid-template-columns: minmax(0, 300px) minmax(0, 1fr); gap: 18px; align-items: start; }
+@media (max-width: 760px) { .wgrid { grid-template-columns: 1fr; } .bar { grid-template-columns: 110px 1fr 80px; } }
+.form { display: grid; gap: 12px; }
+.form .pair { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.out { display: grid; gap: 14px; }
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; }
+.stat { border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; display: grid; gap: 2px; }
+.stat .k { font-size: .75rem; color: var(--muted); }
+.stat .v { font-size: 1.25rem; font-weight: 600; font-variant-numeric: tabular-nums; }
+.pill { display: inline-block; font-size: .75rem; font-weight: 600; padding: 2px 10px; border-radius: 999px; }
+.pill.good { background: color-mix(in srgb, var(--good) 16%, transparent); color: var(--good); }
+.pill.warn { background: color-mix(in srgb, var(--warn) 18%, transparent); color: var(--warn); }
+.pill.bad { background: color-mix(in srgb, var(--bad) 14%, transparent); color: var(--bad); }
+.chart svg { width: 100%; height: auto; display: block; }
+.alert { border-left: 3px solid var(--warn); padding: 8px 12px; background: color-mix(in srgb, var(--warn) 8%, transparent); border-radius: 0 8px 8px 0; font-size: .9rem; }
+.phases { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+.phases .card { display: grid; gap: 6px; align-content: start; }
+.phases ul, .swaps ul { margin: 0; padding-left: 18px; font-size: .92rem; }
+.swaps table { min-width: 520px; }
+.sources ol { margin: 0; padding-left: 20px; display: grid; gap: 4px; font-size: .9rem; }
+.sources a { color: var(--gold); }
+@media (prefers-reduced-motion: no-preference) { .fill { transition: width .3s ease; } }
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="songket" id="ribbon" aria-hidden="true"></div>
+    <span class="eyebrow">Malay wedding · weight plan</span>
+    <h1>Kekkonshiki Planner</h1>
+    <p class="lede">One page for the wedding and the body you want to walk into it with. Budget, colours and a weight plan, all counting down to the same date.</p>
+    <div class="row">
+      <label class="f" for="weddingDate">Wedding date (bersanding)
+        <input type="date" id="weddingDate">
+      </label>
+      <span class="note" id="dateNote">Example date. Change it to yours.</span>
+    </div>
+    <div class="summary">
+      <div class="tile"><span class="k">Days to wedding</span><span class="v" id="sumDays">—</span><span class="s" id="sumWeeks">—</span></div>
+      <div class="tile"><span class="k">Budget estimate</span><span class="v" id="sumBudget">—</span><span class="s" id="sumTier">—</span></div>
+      <div class="tile"><span class="k">Weight target</span><span class="v" id="sumWeight">—</span><span class="s" id="sumWeightS">—</span></div>
+      <div class="tile"><span class="k">Colour theme</span><span class="v" id="sumPalette" style="font-size:1.2rem">—</span><span class="s">Pick one in Colours</span></div>
+    </div>
+    <nav class="toc" aria-label="Sections">
+      <a href="#journey">Journey</a><a href="#budget">Budget</a><a href="#colours">Colours</a><a href="#weight">Weight plan</a><a href="#sources">Sources</a>
+    </nav>
+  </header>
+
+  <!-- JOURNEY -->
+  <section id="journey">
+    <div class="songket" aria-hidden="true"></div>
+    <div class="sec-head">
+      <span class="eyebrow">What is needed</span>
+      <h2>The journey, step by step</h2>
+      <p class="muted">The traditional adat steps, then the paperwork and bookings. Timings are a suggested plan, not a rule.</p>
+    </div>
+    <div class="adat">
+      <div class="card"><b>Merisik</b><span class="small muted">An older relative of the groom visits the bride's family to ask if she is free to marry.</span></div>
+      <div class="card"><b>Meminang</b><span class="small muted">The formal proposal. Families agree on wang hantaran, mas kahwin and dates.</span></div>
+      <div class="card"><b>Bertunang</b><span class="small muted">Engagement. Ring and gift trays are exchanged.</span></div>
+      <div class="card"><b>Berinai</b><span class="small muted">Henna night, a few days before the nikah.</span></div>
+      <div class="card"><b>Akad nikah</b><span class="small muted">The marriage contract. Groom says the ijab kabul before the wali and witnesses.</span></div>
+      <div class="card"><b>Bersanding</b><span class="small muted">The reception. The couple sits on the pelamin for family and guests.</span></div>
+    </div>
+    <div class="card">
+      <div class="timeline" id="timeline"></div>
+      <p class="note">⚠️ Verify: course, HIV screening and nikah application rules and fees differ by state. Check your state religious department (JAIN) or the SPPIM portal before booking dates.</p>
+    </div>
+  </section>
+
+  <!-- BUDGET -->
+  <section id="budget">
+    <div class="songket" aria-hidden="true"></div>
+    <div class="sec-head">
+      <span class="eyebrow">Budget and total cost</span>
+      <h2>What it costs</h2>
+      <p class="muted">Pick a level, then type your own quotes over the numbers. Green tags come from published ranges. Amber tags are my estimates. Red tags need a call to the authority.</p>
+    </div>
+    <div class="row">
+      <div class="seg" role="group" aria-label="Budget level" id="tierSeg">
+        <button type="button" data-tier="0">Jimat (simple)</button>
+        <button type="button" data-tier="1">Sederhana (mid)</button>
+        <button type="button" data-tier="2">Mewah (grand)</button>
+      </div>
+      <label class="f" for="guests">Guests (pax)
+        <input type="number" id="guests" min="0" step="50" style="width:110px">
+      </label>
+      <button class="btn" type="button" id="resetBudget">Reset to level</button>
+    </div>
+    <div class="tablebox">
+      <table>
+        <thead><tr><th>Item</th><th>Basis</th><th class="r">Amount (RM)</th><th class="r">Line total</th><th>Data</th></tr></thead>
+        <tbody id="budgetBody"></tbody>
+        <tfoot>
+          <tr><td colspan="3">Subtotal</td><td class="r" id="subTotal">—</td><td></td></tr>
+          <tr><td colspan="3">Contingency 10% (things always cost more)</td><td class="r" id="contTotal">—</td><td></td></tr>
+          <tr class="grand"><td colspan="3">Total</td><td class="r" id="grandTotal">—</td><td></td></tr>
+          <tr><td colspan="3" class="muted" style="font-weight:400">Total without wang hantaran (closer to how most guides count)</td><td class="r muted" id="noHantaran" style="font-weight:400">—</td><td></td></tr>
+        </tfoot>
+      </table>
+    </div>
+    <div class="card">
+      <h3 style="margin-bottom:10px">Where the money goes</h3>
+      <div class="bars" id="bars"></div>
+    </div>
+    <div class="card small" style="display:grid;gap:6px">
+      <b>What the research says</b>
+      <span>• A 2026 guide puts a Malay wedding at about <b>RM30,000–RM80,000</b>. Catering is about 35–50% of the total.</span>
+      <span>• A UMK professor puts Malaysian weddings overall at <b>RM50,000–RM200,000</b>. Sources disagree, and none state their method.</span>
+      <span>• The biggest lever is guest count. Each 100 guests at RM45 per pax is RM4,500 of catering, plus door gifts.</span>
+    </div>
+  </section>
+
+  <!-- COLOURS -->
+  <section id="colours">
+    <div class="songket" aria-hidden="true"></div>
+    <div class="sec-head">
+      <span class="eyebrow">Colour planning</span>
+      <h2>Choose a palette</h2>
+      <p class="muted">Tap one to make it your theme. The ribbons on this page change to match. Many couples wear a lighter tone for akad nikah and a stronger one for bersanding.</p>
+    </div>
+    <div class="palettes" id="palettes"></div>
+    <div class="card small" style="display:grid;gap:6px">
+      <b>Rules that keep a palette working</b>
+      <span>1. Use 60 / 30 / 10. One main colour, one support colour, one metal or accent.</span>
+      <span>2. Match the groom's samping to the bride's accent, not her main colour. It looks planned, not copied.</span>
+      <span>3. Test fabric under the hall's real lighting. Warm hall lights turn grey and baby blue dull.</span>
+      <span>4. Give the pelamin your strongest colour. Photos are built around it.</span>
+      <span>5. Pick the palette early. Tell the mak andam, pelamin vendor and tailor the same hex codes.</span>
+    </div>
+  </section>
+
+  <!-- WEIGHT -->
+  <section id="weight">
+    <div class="songket" aria-hidden="true"></div>
+    <div class="sec-head">
+      <span class="eyebrow">Weight loss target and plan</span>
+      <h2>Your weight plan</h2>
+      <p class="muted">Enter your own numbers. The plan aims for a safe 0.5–1 kg per week, and stops losing 4 weeks before the wedding so your final baju fitting stays accurate.</p>
+    </div>
+    <div class="wgrid">
+      <div class="card form">
+        <div class="seg" role="group" aria-label="Sex" id="sexSeg">
+          <button type="button" data-sex="f">Female</button>
+          <button type="button" data-sex="m">Male</button>
+        </div>
+        <div class="pair">
+          <label class="f" for="age">Age<input type="number" id="age" min="16" max="90"></label>
+          <label class="f" for="height">Height (cm)<input type="number" id="height" min="120" max="230"></label>
+        </div>
+        <div class="pair">
+          <label class="f" for="weight">Weight now (kg)<input type="number" id="weight" min="35" max="300" step="0.1"></label>
+          <label class="f" for="goal">Own target (kg)<input type="number" id="goal" min="35" max="300" step="0.1" placeholder="auto"></label>
+        </div>
+        <label class="f" for="activity">Activity level
+          <select id="activity">
+            <option value="1.2">Desk job, little exercise</option>
+            <option value="1.375">Light: exercise 1–3 days a week</option>
+            <option value="1.55">Moderate: exercise 3–5 days a week</option>
+            <option value="1.725">Active: hard exercise 6–7 days</option>
+          </select>
+        </label>
+        <p class="note" id="exampleNote">Example numbers are filled in. Replace them with yours.</p>
+      </div>
+      <div class="card out">
+        <div class="stats" id="wStats"></div>
+        <div id="wAlert"></div>
+        <div class="chart" id="wChart" aria-label="Projected weight from today to the wedding"></div>
+        <p class="note">BMI uses Malaysia's Asian cut-offs: overweight from 23, obese from 27.5. Calories use the Mifflin-St Jeor formula. These are estimates. A doctor or dietitian should check them, especially if you have a health condition.</p>
+      </div>
+    </div>
+    <div class="phases">
+      <div class="card"><span class="eyebrow">Phase 1 · first 4 weeks</span><h3>Build the habits</h3>
+        <ul>
+          <li>Weigh once a week, same day, morning, after the toilet.</li>
+          <li>Use the Suku Suku Separuh plate: ¼ rice, ¼ protein, ½ vegetables and fruit.</li>
+          <li>Walk 7,000+ steps a day. Add more later.</li>
+          <li>Cut sweet drinks first. This is the easiest big win.</li>
+        </ul></div>
+      <div class="card"><span class="eyebrow">Phase 2 · main stretch</span><h3>Lose steadily</h3>
+        <ul>
+          <li>Eat near the daily calorie number above.</li>
+          <li>Strength training 2–3 times a week. It keeps muscle, so the baju fits better.</li>
+          <li>Protein at every meal: fish, chicken, eggs, tempeh, tofu.</li>
+          <li>Plan for kenduri and Raya. Eat a normal meal, then go back to plan the next day.</li>
+        </ul></div>
+      <div class="card"><span class="eyebrow">Phase 3 · last 4 weeks</span><h3>Hold and fit</h3>
+        <ul>
+          <li>Stop the deficit. Eat at maintenance.</li>
+          <li>Final baju nikah and sanding fitting at the start of this phase.</li>
+          <li>No crash diets or detox teas. They cause tiredness and puffiness on the day.</li>
+          <li>Sleep 7–8 hours. Drink water. Keep salt normal.</li>
+        </ul></div>
+    </div>
+    <div class="card swaps">
+      <h3 style="margin-bottom:10px">Everyday Malaysian swaps</h3>
+      <div class="tablebox" style="border:0">
+        <table>
+          <thead><tr><th>Instead of</th><th>Try</th><th>Why it helps</th></tr></thead>
+          <tbody>
+            <tr><td>Teh tarik / kopi manis</td><td>Teh O kosong or kurang manis</td><td>Removes most of the sugar</td></tr>
+            <tr><td>Nasi lemak with full sambal</td><td>Half rice, egg, more timun, sambal on the side</td><td>Smaller rice and oil portion</td></tr>
+            <tr><td>Goreng (fried) lauk</td><td>Bakar, rebus, kukus or masak asam</td><td>Less cooking oil</td></tr>
+            <tr><td>Roti canai with kuah</td><td>Thosai or wholemeal roti</td><td>Less fat per piece</td></tr>
+            <tr><td>Kuih with every drink</td><td>Fruit: papaya, guava, apple</td><td>More fibre, fewer calories</td></tr>
+            <tr><td>Late supper mamak</td><td>Close the kitchen 3 hours before sleep</td><td>Cuts the easiest extra meal</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="note">The swap list is general advice, not taken from a single source.</p>
+    </div>
+  </section>
+
+  <!-- SOURCES -->
+  <section id="sources" class="sources">
+    <div class="songket" aria-hidden="true"></div>
+    <div class="sec-head"><span class="eyebrow">Sources</span><h2>Where the numbers come from</h2></div>
+    <div class="card">
+      <ol>
+        <li><a href="https://www.imoney.my/articles/wedding-cost-malaysia-2" target="_blank" rel="noopener">iMoney — Wedding costs 2026, by component</a></li>
+        <li><a href="https://thesun.my/news/need-at-least-rm40k-m-sian-laments-soaring-wedding-costs-sparks-discussion-fi14490577/" target="_blank" rel="noopener">theSun — "Need at least RM40k" wedding cost discussion</a></li>
+        <li><a href="https://says.com/my/news/umk-professor-msian-wedding-costs-among-highest-in-asean" target="_blank" rel="noopener">SAYS — UMK professor on Malaysian wedding costs</a></li>
+        <li><a href="https://ringgitplus.com/en/blog/budgeting-saving/chinese-indian-or-malay-which-malaysian-wedding-is-the-cheapest.html" target="_blank" rel="noopener">RinggitPlus — Chinese, Indian or Malay: which wedding is cheapest?</a></li>
+        <li><a href="https://chiefeater.com/best-halal-caterers-in-klang-valley/" target="_blank" rel="noopener">Chiefeater — Halal caterers in Klang Valley</a></li>
+        <li><a href="https://skreact.siakapkeli.my/articles/kadar-mas-kahwin-pahang-dinaikkan-bermula-rm100-sultan-pahang" target="_blank" rel="noopener">Siakap Keli — Pahang mas kahwin raised to RM100</a></li>
+        <li><a href="https://www.malaysia.gov.my/my/categories/institusi-keluarga/perkahwinan-pasangan-islam/kursus-pra-perkahwinan-islam" target="_blank" rel="noopener">MyGOV — Kursus Pra-Perkahwinan Islam</a></li>
+        <li><a href="https://www.theknot.com/content/malaysia-wedding-traditions" target="_blank" rel="noopener">The Knot — Malay wedding traditions</a></li>
+        <li><a href="https://says.com/my/seismik/khas-buat-bakal-pengantin-ini-7-warna-tema-majlis-perkahwinan-yang-paling-in-tahun-ini/" target="_blank" rel="noopener">SAYS Seismik — 7 popular wedding theme colours</a></li>
+        <li><a href="https://codeblue.galencentre.org/2023/12/malaysias-latest-obesity-management-cpg-obesity-is-chronic/" target="_blank" rel="noopener">CodeBlue — Malaysia's 2023 obesity CPG</a></li>
+        <li><a href="https://www.sunwaymedicalpenang.com.my/health-articles/obesity-in-malaysia/" target="_blank" rel="noopener">Sunway Medical — Asian BMI cut-offs in Malaysia</a></li>
+        <li><a href="https://www.boltpharmacy.co.uk/guide/how-much-calorie-deficit-to-lose-weight" target="_blank" rel="noopener">NHS guidance as summarised: 0.5–1 kg a week, ~600 kcal deficit</a></li>
+      </ol>
+    </div>
+  </section>
+</div>
+
+<script>
+(function () {
+  "use strict";
+  var KEY = "kekkonshiki-planner-v1";
+  var store = {};
+  try { store = JSON.parse(localStorage.getItem(KEY) || "{}") || {}; } catch (e) { store = {}; }
+  function save() { try { localStorage.setItem(KEY, JSON.stringify(store)); } catch (e) {} }
+  var $ = function (id) { return document.getElementById(id); };
+  var rm = function (n) { return "RM" + Math.round(n).toLocaleString("en-MY"); };
+  var DAY = 86400000;
+
+  /* ---------- date ---------- */
+  var today = new Date(); today.setHours(0, 0, 0, 0);
+  function defaultDate() { var d = new Date(today); d.setFullYear(d.getFullYear() + 1); return d.toISOString().slice(0, 10); }
+  var dateEl = $("weddingDate");
+  dateEl.value = store.date || defaultDate();
+  if (store.date) $("dateNote").hidden = true;
+  function weddingDate() { var d = new Date(dateEl.value + "T00:00:00"); return isNaN(d) ? new Date(today.getTime() + 365 * DAY) : d; }
+  function fmt(d) { return d.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }); }
+  dateEl.addEventListener("change", function () { store.date = dateEl.value; $("dateNote").hidden = true; save(); renderAll(); });
+
+  /* ---------- timeline ---------- */
+  var plan = [
+    [12, "12 months before", ["Agree the total budget and who pays for what", "Fix guest count range and wedding date", "Merisik and meminang between families", "Book venue and caterer first (they fill up)", "Start the weight plan"]],
+    [9, "9 months before", ["Bertunang", "Book photographer, mak andam and pelamin vendor", "Choose the colour palette and share hex codes with vendors"]],
+    [6, "6 months before", ["Attend kursus pra-perkahwinan (register on SPPIM / MySPPIM)", "Design or rent attire. Order with extra seam allowance for weight loss", "Draft invitation list per family"]],
+    [4, "3–4 months before", ["HIV screening and apply for kebenaran berkahwin via SPPIM (timing varies by state)", "Send invitations (digital or printed)", "Order door gifts and gubahan hantaran trays"]],
+    [1, "1–2 months before", ["Final baju fitting at the start of the weight-hold phase", "Confirm final pax with caterer", "Rehearse akad nikah with the jurunikah's requirements"]],
+    [0, "Wedding week", ["Berinai", "Akad nikah", "Bersanding", "Rest. Eat normally. Drink water."]]
+  ];
+  function renderTimeline() {
+    var w = weddingDate();
+    $("timeline").innerHTML = plan.map(function (p) {
+      var d = new Date(w); d.setMonth(d.getMonth() - p[0]);
+      var past = d < today && p[0] > 0;
+      return '<div class="step"><span class="when">' + p[1].toUpperCase() + " · " + (p[0] ? "by " + fmt(d) : fmt(w)) + (past ? ' <span class="tag ver">date already passed</span>' : "") + "</span><ul>" +
+        p[2].map(function (t) { return "<li>" + t + "</li>"; }).join("") + "</ul></div>";
+    }).join("");
+  }
+
+  /* ---------- budget ---------- */
+  // [id, group, label, basis, values per tier, tag, note]
+  var GUESTS = [300, 600, 1000];
+  var items = [
+    ["catering", "Reception", "Catering", "pax", [25, 45, 80], "src", "Guide: RM38–130/pax buffet; RM80/pax anecdote; basic caterers from ~RM18"],
+    ["venue", "Reception", "Venue / hall / canopy", "flat", [1000, 1800, 15000], "src", "Community hall RM400–1,800; hotel ballroom RM5,000–30,000"],
+    ["decor", "Reception", "Pelamin, decor, flowers", "flat", [3000, 7000, 15000], "src", "Guide: RM3,000–15,000"],
+    ["doorgift", "Reception", "Door gifts / bunga telur", "pax", [1.5, 3, 6], "est", ""],
+    ["invite", "Reception", "Invitations (kad / digital)", "flat", [200, 800, 2500], "est", ""],
+    ["attire", "Couple", "Attire, both, all events", "flat", [2000, 4500, 8000], "src", "Guide: RM2,000–8,000"],
+    ["andam", "Couple", "Mak andam (makeup and styling)", "flat", [1000, 2500, 5000], "est", ""],
+    ["photo", "Couple", "Photo and video", "flat", [3000, 6000, 10000], "src", "Guide: RM3,000–10,000"],
+    ["rings", "Couple", "Rings", "flat", [1500, 3000, 6000], "est", ""],
+    ["wang", "Adat", "Wang hantaran", "flat", [8000, 15000, 25000], "est", "Agreed between families. No reliable published average found"],
+    ["trays", "Adat", "Hantaran gifts and gubahan trays", "flat", [3000, 7000, 12000], "src", "Guide: RM5,000–10,000; KL RM10,000–15,000+"],
+    ["mas", "Adat", "Mas kahwin", "flat", [100, 300, 1000], "ver", "Minimum set by each state (Pahang raised to RM100). Check your state"],
+    ["tunang", "Adat", "Bertunang event", "flat", [1500, 3000, 6000], "est", ""],
+    ["akad", "Adat", "Akad nikah and berinai", "flat", [1000, 2500, 5000], "est", ""],
+    ["admin", "Paperwork", "Kursus, HIV test, nikah fees", "flat", [300, 300, 300], "ver", "Fees vary by state. Check JAIN / SPPIM"]
+  ];
+  var tagText = { src: "Sourced range", est: "Estimate", ver: "⚠️ Verify" };
+  var b = store.budget || null;
+  function tierValues(t) { var v = {}; items.forEach(function (it) { v[it[0]] = it[4][t]; }); return { tier: t, guests: GUESTS[t], v: v }; }
+  if (!b) b = tierValues(1);
+
+  function setTierButtons() {
+    Array.prototype.forEach.call($("tierSeg").querySelectorAll("button"), function (btn) { btn.setAttribute("aria-pressed", String(+btn.dataset.tier === b.tier)); });
+  }
+  function budgetTotals() {
+    var lines = {}, sub = 0;
+    items.forEach(function (it) { var amt = +b.v[it[0]] || 0; var t = it[3] === "pax" ? amt * b.guests : amt; lines[it[0]] = t; sub += t; });
+    var cont = sub * 0.1;
+    return { lines: lines, sub: sub, cont: cont, total: sub + cont, noWang: (sub - lines.wang) * 1.1 };
+  }
+  function renderBudgetTable() {
+    var html = "", group = "";
+    items.forEach(function (it) {
+      if (it[1] !== group) { group = it[1]; html += '<tr class="group"><td colspan="5">' + group + "</td></tr>"; }
+      html += "<tr><td>" + it[2] + (it[6] ? '<div class="note">' + it[6] + "</div>" : "") + "</td>" +
+        "<td class=\"small muted\">" + (it[3] === "pax" ? "per guest" : "lump sum") + "</td>" +
+        '<td class="r"><input type="number" min="0" step="' + (it[3] === "pax" ? "0.5" : "100") + '" id="amt-' + it[0] + '" data-id="' + it[0] + '" value="' + b.v[it[0]] + '" aria-label="' + it[2] + ' amount"></td>' +
+        '<td class="r" id="line-' + it[0] + '"></td><td><span class="tag ' + it[5] + '">' + tagText[it[5]] + "</span></td></tr>";
+    });
+    $("budgetBody").innerHTML = html;
+    $("guests").value = b.guests;
+    setTierButtons();
+  }
+  function renderBudgetNumbers() {
+    var t = budgetTotals();
+    items.forEach(function (it) { $("line-" + it[0]).textContent = rm(t.lines[it[0]]); });
+    $("subTotal").textContent = rm(t.sub);
+    $("contTotal").textContent = rm(t.cont);
+    $("grandTotal").textContent = rm(t.total);
+    $("noHantaran").textContent = rm(t.noWang);
+    var groups = {};
+    items.forEach(function (it) { var g = it[0] === "catering" ? "Catering" : it[0] === "wang" ? "Wang hantaran" : it[1] === "Reception" ? "Venue, decor, gifts" : it[1]; groups[g] = (groups[g] || 0) + t.lines[it[0]]; });
+    var max = Math.max.apply(null, Object.keys(groups).map(function (k) { return groups[k]; })) || 1;
+    $("bars").innerHTML = Object.keys(groups).sort(function (a, c) { return groups[c] - groups[a]; }).map(function (k) {
+      var pct = t.sub ? Math.round(groups[k] / t.sub * 100) : 0;
+      return '<div class="bar"><span>' + k + ' <span class="muted">' + pct + '%</span></span><div class="track"><div class="fill" style="width:' + (groups[k] / max * 100) + '%"></div></div><span class="amt">' + rm(groups[k]) + "</span></div>";
+    }).join("");
+    var names = ["Jimat", "Sederhana", "Mewah"];
+    $("sumBudget").textContent = rm(t.total);
+    $("sumTier").textContent = (b.tier === null ? "Custom" : names[b.tier]) + " · " + b.guests.toLocaleString("en-MY") + " guests";
+  }
+  $("budgetBody").addEventListener("input", function (e) {
+    var id = e.target.dataset && e.target.dataset.id; if (!id) return;
+    b.v[id] = Math.max(0, +e.target.value || 0); b.tier = null; setTierButtons(); store.budget = b; save(); renderBudgetNumbers();
+  });
+  $("guests").addEventListener("input", function () { b.guests = Math.max(0, Math.round(+$("guests").value || 0)); b.tier = null; setTierButtons(); store.budget = b; save(); renderBudgetNumbers(); });
+  $("tierSeg").addEventListener("click", function (e) { var t = e.target.closest("button"); if (!t) return; b = tierValues(+t.dataset.tier); store.budget = b; save(); renderBudgetTable(); renderBudgetNumbers(); });
+  $("resetBudget").addEventListener("click", function () { b = tierValues(b.tier === null ? 1 : b.tier); store.budget = b; save(); renderBudgetTable(); renderBudgetNumbers(); });
+
+  /* ---------- palettes ---------- */
+  var palettes = [
+    { id: "sage", name: "Sage & Champagne", src: "trend", c: ["#9CAF88", "#E8D9B5", "#FAF6EC", "#C2A15A", "#4F5D3A"], akad: "Champagne or ivory", sanding: "Sage with gold songket", pelamin: "Ivory base, sage greenery", samping: "Champagne gold", feel: "Calm, garden, daylight" },
+    { id: "maroon", name: "Maroon & Antique Gold", src: "says", c: ["#6E1E2B", "#B8913A", "#E9C9C1", "#F3E9DC", "#2B2B2B"], akad: "Soft blush or cream", sanding: "Maroon with gold songket", pelamin: "Maroon drapes, gold frame", samping: "Antique gold", feel: "Rich, classic, night events" },
+    { id: "blue", name: "Baby Blue & Silver", src: "says", c: ["#A9C8E6", "#DCE8F3", "#FFFFFF", "#C0C4CA", "#24395C"], akad: "White", sanding: "Baby blue with silver beading", pelamin: "White and blue florals", samping: "Navy or silver", feel: "Light, airy, large decor" },
+    { id: "kuning", name: "Kuning Diraja", src: "says", c: ["#E2B007", "#1F4D3A", "#FBF5E2", "#A87F16", "#7A1F1F"], akad: "Ivory", sanding: "Royal yellow songket", pelamin: "Yellow and deep green", samping: "Deep green", feel: "Bright, festive, traditional" },
+    { id: "mint", name: "Mint & Rose Gold", src: "says", c: ["#BFE3D0", "#FAF7F2", "#B76E79", "#E8D5CF", "#5E8C77"], akad: "Off-white", sanding: "Mint with rose-gold lace", pelamin: "White with mint florals", samping: "Rose gold", feel: "Fresh, pastel, popular" },
+    { id: "lilac", name: "Lilac & Plum", src: "says", c: ["#C8B6E2", "#E6DDF2", "#FFFFFF", "#B9BCC4", "#5B3F7A"], akad: "Lavender-white", sanding: "Lilac with silver", pelamin: "Lilac florals, plum accents", samping: "Plum", feel: "Soft but not plain" },
+    { id: "mocha", name: "Coklat Cair (Mocha)", src: "says", c: ["#C8A98A", "#EADBC8", "#FFFCF7", "#B08A4A", "#6B4E37"], akad: "Cream", sanding: "Light brown with gold", pelamin: "Mocha and cream, rattan", samping: "Dark brown", feel: "Warm, rare, distinctive" },
+    { id: "grey", name: "Grey & Blush", src: "says", c: ["#8C8F94", "#E8C4C4", "#F5F2F0", "#B98B82", "#3F4247"], akad: "Blush", sanding: "Grey with blush embroidery", pelamin: "Light pelamin, grey only as accent", samping: "Blush or charcoal", feel: "Modern. Keep the pelamin light" }
+  ];
+  var chosen = store.palette || null;
+  function renderPalettes() {
+    $("palettes").innerHTML = palettes.map(function (p) {
+      return '<button type="button" class="pal" data-id="' + p.id + '" aria-pressed="' + (chosen === p.id) + '">' +
+        '<div class="swatches">' + p.c.map(function (c) { return '<span style="background:' + c + '"></span>'; }).join("") + "</div>" +
+        '<div class="body"><div class="name"><b>' + p.name + '</b><span class="tag ' + (p.src === "says" ? "src" : "est") + '">' + (p.src === "says" ? "Popular in MY" : "Trend") + "</span></div>" +
+        '<span class="small muted">' + p.feel + "</span>" +
+        "<dl><dt>Akad nikah</dt><dd>" + p.akad + "</dd><dt>Bersanding</dt><dd>" + p.sanding + "</dd><dt>Pelamin</dt><dd>" + p.pelamin + "</dd><dt>Groom's samping</dt><dd>" + p.samping + "</dd></dl>" +
+        '<div class="hexes">' + p.c.map(function (c) { return "<code>" + c + "</code>"; }).join("") + "</div></div></button>";
+    }).join("");
+    applyPalette();
+  }
+  function applyPalette() {
+    var p = palettes.filter(function (x) { return x.id === chosen; })[0];
+    var root = document.documentElement.style;
+    if (p) { root.setProperty("--ribbon-1", p.c[0]); root.setProperty("--ribbon-2", p.c[4]); root.setProperty("--ribbon-3", p.c[1]); }
+    else { root.removeProperty("--ribbon-1"); root.removeProperty("--ribbon-2"); root.removeProperty("--ribbon-3"); }
+    $("sumPalette").textContent = p ? p.name : "Not chosen";
+  }
+  $("palettes").addEventListener("click", function (e) {
+    var t = e.target.closest(".pal"); if (!t) return;
+    chosen = chosen === t.dataset.id ? null : t.dataset.id; store.palette = chosen; save();
+    Array.prototype.forEach.call($("palettes").querySelectorAll(".pal"), function (el) { el.setAttribute("aria-pressed", String(el.dataset.id === chosen)); });
+    applyPalette();
+  });
+
+  /* ---------- weight ---------- */
+  var w = store.weight || { sex: "f", age: 28, height: 158, weight: 72, goal: "", activity: "1.375", example: true };
+  ["age", "height", "weight", "goal", "activity"].forEach(function (k) { $(k).value = w[k]; });
+  $("exampleNote").hidden = !w.example;
+  function setSexButtons() { Array.prototype.forEach.call($("sexSeg").querySelectorAll("button"), function (btn) { btn.setAttribute("aria-pressed", String(btn.dataset.sex === w.sex)); }); }
+  setSexButtons();
+  $("sexSeg").addEventListener("click", function (e) { var t = e.target.closest("button"); if (!t) return; w.sex = t.dataset.sex; w.example = false; setSexButtons(); persistW(); });
+  ["age", "height", "weight", "goal", "activity"].forEach(function (k) { $(k).addEventListener("input", function () { w[k] = $(k).value; w.example = false; persistW(); }); });
+  function persistW() { $("exampleNote").hidden = !w.example; store.weight = w; save(); renderWeight(); }
+
+  function bmiClass(bmi) {
+    if (bmi < 18.5) return ["Underweight", "warn"];
+    if (bmi < 23) return ["Healthy (Asian)", "good"];
+    if (bmi < 27.5) return ["Overweight (Asian)", "warn"];
+    return ["Obese (Asian)", "bad"];
+  }
+  function calc() {
+    var h = +w.height / 100, kg = +w.weight, age = +w.age;
+    if (!(h > 1 && kg > 30 && age > 15)) return null;
+    var wd = weddingDate();
+    var weeks = Math.max(0, (wd - today) / DAY / 7);
+    var holdWeeks = weeks > 8 ? 4 : 0;
+    var lossWeeks = Math.max(0, weeks - holdWeeks);
+    var bmi = kg / (h * h);
+    var healthyMax = Math.floor(22.9 * h * h * 10) / 10;
+    var auto = Math.max(healthyMax, Math.round((kg - 0.5 * lossWeeks) * 10) / 10);
+    if (bmi < 23) auto = kg;
+    var goal = w.goal !== "" && +w.goal > 30 ? +w.goal : auto;
+    var toLose = Math.max(0, kg - goal);
+    var rate = lossWeeks > 0 ? toLose / lossWeeks : (toLose > 0 ? Infinity : 0);
+    var bmr = 10 * kg + 625 * h - 5 * age + (w.sex === "m" ? 5 : -161);
+    var tdee = bmr * +w.activity;
+    var deficit = rate * 7700 / 7;
+    var floor = w.sex === "m" ? 1500 : 1200;
+    var intake = tdee - deficit, floored = false;
+    if (intake < floor) { intake = floor; floored = true; }
+    var maint = (10 * goal + 625 * h - 5 * age + (w.sex === "m" ? 5 : -161)) * +w.activity;
+    return { h: h, kg: kg, bmi: bmi, healthyMax: healthyMax, goal: goal, auto: auto, toLose: toLose, rate: rate, weeks: weeks, lossWeeks: lossWeeks, holdWeeks: holdWeeks, tdee: tdee, intake: intake, floored: floored, maint: maint, wd: wd };
+  }
+  function renderWeight() {
+    var r = calc();
+    if (!r) { $("wStats").innerHTML = ""; $("wChart").innerHTML = ""; $("wAlert").innerHTML = '<p class="alert">Enter age, height and weight to see your plan.</p>'; $("sumWeight").textContent = "—"; $("sumWeightS").textContent = "Enter your numbers"; return; }
+    var cls = bmiClass(r.bmi), goalBmi = r.goal / (r.h * r.h);
+    var rateCls = r.rate === 0 ? "good" : r.rate <= 0.75 ? "good" : r.rate <= 1 ? "warn" : "bad";
+    var rateTxt = r.rate === 0 ? "Hold" : r.rate === Infinity ? "No time" : r.rate.toFixed(2) + " kg";
+    $("wStats").innerHTML =
+      stat("BMI now", r.bmi.toFixed(1), '<span class="pill ' + cls[1] + '">' + cls[0] + "</span>") +
+      stat("Target weight", r.goal.toFixed(1) + " kg", "BMI " + goalBmi.toFixed(1) + (w.goal === "" ? " · auto" : " · your choice")) +
+      stat("To lose", r.toLose.toFixed(1) + " kg", Math.round(r.toLose / r.kg * 100) + "% of body weight") +
+      stat("Pace per week", rateTxt, '<span class="pill ' + rateCls + '">' + (rateCls === "good" ? "Safe" : rateCls === "warn" ? "Upper limit" : "Too fast") + "</span>") +
+      stat("Eat per day", Math.round(r.intake / 10) * 10 + " kcal", "Maintenance now ≈ " + Math.round(r.tdee / 10) * 10) +
+      stat("After target", Math.round(r.maint / 10) * 10 + " kcal", "Maintenance at goal");
+    var msgs = [];
+    if (r.bmi < 23 && w.goal === "") msgs.push("Your BMI is already in the healthy Asian range. The plan holds your weight. Focus on strength training and posture instead of loss.");
+    if (r.rate > 1) msgs.push("This target needs more than 1 kg a week. Pick a lighter target or a later date. Fast loss costs muscle and energy.");
+    if (r.floored) msgs.push("Your calorie number hit the minimum (" + (w.sex === "m" ? "1,500" : "1,200") + " kcal). Do not eat less than this without a doctor. Add activity instead.");
+    if (goalBmi < 18.5) msgs.push("This target is below a healthy BMI. Choose a higher target.");
+    if (r.holdWeeks === 0 && r.weeks > 0) msgs.push("Less than 8 weeks left. Skip the loss phase and focus on habits, sleep and fitting.");
+    $("wAlert").innerHTML = msgs.map(function (m) { return '<p class="alert">' + m + "</p>"; }).join("");
+    $("sumWeight").textContent = r.goal.toFixed(1) + " kg";
+    $("sumWeightS").textContent = r.toLose > 0 ? "−" + r.toLose.toFixed(1) + " kg · " + rateTxt + "/week" : "Hold current weight";
+    renderChart(r);
+  }
+  function stat(k, v, s) { return '<div class="stat"><span class="k">' + k + '</span><span class="v">' + v + '</span><span class="small muted">' + s + "</span></div>"; }
+
+  function renderChart(r) {
+    var W = 640, H = 240, L = 46, R = 16, T = 18, B = 36;
+    var totalWeeks = Math.max(1, r.weeks);
+    var lo = Math.min(r.goal, r.kg) - 2, hi = Math.max(r.goal, r.kg) + 2;
+    var x = function (wk) { return L + (wk / totalWeeks) * (W - L - R); };
+    var y = function (kg) { return T + (hi - kg) / (hi - lo) * (H - T - B); };
+    var rate = r.rate === Infinity ? 0 : r.rate;
+    var pts = [], wk;
+    for (wk = 0; wk <= totalWeeks + 0.001; wk += Math.max(0.5, totalWeeks / 80)) {
+      var kgAt = wk <= r.lossWeeks ? r.kg - rate * wk : r.goal;
+      if (rate === 0) kgAt = r.kg;
+      pts.push([x(wk), y(Math.max(r.goal, kgAt))]);
+    }
+    pts.push([x(totalWeeks), y(rate === 0 ? r.kg : r.goal)]);
+    var line = pts.map(function (p, i) { return (i ? "L" : "M") + p[0].toFixed(1) + " " + p[1].toFixed(1); }).join(" ");
+    var area = line + " L" + x(totalWeeks).toFixed(1) + " " + (H - B) + " L" + L + " " + (H - B) + " Z";
+    var ticks = "", step = (hi - lo) > 16 ? 5 : 2, k;
+    for (k = Math.ceil(lo / step) * step; k <= hi; k += step) {
+      ticks += '<line x1="' + L + '" x2="' + (W - R) + '" y1="' + y(k) + '" y2="' + y(k) + '" stroke="var(--line)" stroke-width="1"/>' +
+        '<text x="' + (L - 6) + '" y="' + (y(k) + 4) + '" text-anchor="end" font-size="11" fill="var(--muted)">' + k + "</text>";
+    }
+    var marks = "";
+    function mark(wkAt, label, anchor) {
+      var X = x(wkAt);
+      marks += '<line x1="' + X + '" x2="' + X + '" y1="' + T + '" y2="' + (H - B) + '" stroke="var(--muted)" stroke-dasharray="3 3" stroke-width="1"/>' +
+        '<text x="' + X + '" y="' + (H - B + 16) + '" text-anchor="' + anchor + '" font-size="11" fill="var(--muted)">' + label + "</text>";
+    }
+    mark(0, "Today", "start");
+    if (r.holdWeeks) {
+      var fit = new Date(r.wd.getTime() - r.holdWeeks * 7 * DAY);
+      mark(r.lossWeeks, "Final fitting · " + fit.toLocaleDateString("en-GB", { day: "numeric", month: "short" }), "end");
+    }
+    mark(totalWeeks, "Wedding", "end");
+    var five = r.kg * 0.95;
+    if (rate > 0 && five >= r.goal) {
+      var wk5 = (r.kg - five) / rate;
+      marks += '<circle cx="' + x(wk5) + '" cy="' + y(five) + '" r="4" fill="var(--plum)"/>' +
+        '<text x="' + (x(wk5) + 7) + '" y="' + (y(five) - 7) + '" font-size="11" fill="var(--plum)">−5% · ' + new Date(today.getTime() + wk5 * 7 * DAY).toLocaleDateString("en-GB", { day: "numeric", month: "short" }) + "</text>";
+    }
+    $("wChart").innerHTML = '<svg viewBox="0 0 ' + W + " " + H + '" role="img"><title>Projected weight in kg from today to the wedding</title>' + ticks +
+      '<path d="' + area + '" fill="var(--gold-soft)" opacity=".7"/>' +
+      '<path d="' + line + '" fill="none" stroke="var(--gold)" stroke-width="2.5" stroke-linejoin="round"/>' + marks +
+      '<circle cx="' + x(totalWeeks) + '" cy="' + y(rate === 0 ? r.kg : r.goal) + '" r="5" fill="var(--gold)"/>' +
+      '<text x="' + (L - 6) + '" y="' + (T - 6) + '" text-anchor="end" font-size="10" fill="var(--muted)">kg</text></svg>';
+  }
+
+  /* ---------- summary ---------- */
+  function renderSummary() {
+    var days = Math.round((weddingDate() - today) / DAY);
+    $("sumDays").textContent = days >= 0 ? days.toLocaleString("en-MY") : "Past";
+    $("sumWeeks").textContent = days >= 0 ? (days / 7).toFixed(0) + " weeks · " + fmt(weddingDate()) : "Pick a future date";
+  }
+  function renderAll() { renderSummary(); renderTimeline(); renderWeight(); }
+
+  renderBudgetTable(); renderBudgetNumbers(); renderPalettes(); renderAll();
+})();
+</script>
