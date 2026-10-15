@@ -110,6 +110,9 @@ th, td { text-align: left; padding: 9px 12px; border-bottom: 1px solid var(--lin
 th { font-size: .75rem; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); font-weight: 600; background: var(--chip); }
 td.r, th.r { text-align: right; font-variant-numeric: tabular-nums; }
 td input { width: 110px; text-align: right; }
+td input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--gold); cursor: pointer; }
+tr.off td:not(:first-child) { opacity: .45; }
+tr.off td input[type="number"] { text-decoration: line-through; }
 tr.group td { background: var(--chip); font-weight: 600; font-size: .8rem; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
 tfoot td { font-weight: 700; border-bottom: 0; }
 tfoot tr.grand td { font-family: var(--display); font-weight: 400; font-size: 1.35rem; }
@@ -215,13 +218,13 @@ tfoot tr.grand td { font-family: var(--display); font-weight: 400; font-size: 1.
     <div class="sec-head">
       <span class="eyebrow">Budget and total cost</span>
       <h2>What it costs</h2>
-      <p class="muted">Pick a level, then type your own quotes over the numbers. Green tags come from published ranges. Amber tags are my estimates. Red tags need a call to the authority.</p>
+      <p class="muted">Pick a level, untick anything you don't need, then type your own quotes over the numbers. Green tags come from published ranges. Amber tags are my estimates. Red tags need a call to the authority.</p>
     </div>
     <div class="row">
       <div class="seg" role="group" aria-label="Budget level" id="tierSeg">
-        <button type="button" data-tier="0">Jimat (simple)</button>
-        <button type="button" data-tier="1">Sederhana (mid)</button>
-        <button type="button" data-tier="2">Mewah (grand)</button>
+        <button type="button" data-tier="0">Kecil (family &amp; friends)</button>
+        <button type="button" data-tier="1">Jimat (simple)</button>
+        <button type="button" data-tier="2">Sederhana (mid)</button>
       </div>
       <label class="f" for="guests">Guests (pax)
         <input type="number" id="guests" min="0" step="50" style="width:110px">
@@ -230,13 +233,13 @@ tfoot tr.grand td { font-family: var(--display); font-weight: 400; font-size: 1.
     </div>
     <div class="tablebox">
       <table>
-        <thead><tr><th>Item</th><th>Basis</th><th class="r">Amount (RM)</th><th class="r">Line total</th><th>Data</th></tr></thead>
+        <thead><tr><th>Use</th><th>Item</th><th>Basis</th><th class="r">Amount (RM)</th><th class="r">Line total</th><th>Data</th></tr></thead>
         <tbody id="budgetBody"></tbody>
         <tfoot>
-          <tr><td colspan="3">Subtotal</td><td class="r" id="subTotal">—</td><td></td></tr>
-          <tr><td colspan="3">Contingency 10% (things always cost more)</td><td class="r" id="contTotal">—</td><td></td></tr>
-          <tr class="grand"><td colspan="3">Total</td><td class="r" id="grandTotal">—</td><td></td></tr>
-          <tr><td colspan="3" class="muted" style="font-weight:400">Total without wang hantaran (closer to how most guides count)</td><td class="r muted" id="noHantaran" style="font-weight:400">—</td><td></td></tr>
+          <tr><td colspan="4">Subtotal</td><td class="r" id="subTotal">—</td><td></td></tr>
+          <tr><td colspan="4">Contingency 10% (things always cost more)</td><td class="r" id="contTotal">—</td><td></td></tr>
+          <tr class="grand"><td colspan="4">Total</td><td class="r" id="grandTotal">—</td><td></td></tr>
+          <tr><td colspan="4" class="muted" style="font-weight:400">Total without wang hantaran (closer to how most guides count)</td><td class="r muted" id="noHantaran" style="font-weight:400">—</td><td></td></tr>
         </tfoot>
       </table>
     </div>
@@ -246,6 +249,7 @@ tfoot tr.grand td { font-family: var(--display); font-weight: 400; font-size: 1.
     </div>
     <div class="card small" style="display:grid;gap:6px">
       <b>What the research says</b>
+      <span>• <b>Small wedding (Kecil):</b> about 150 family and friends, home or community hall, mini pelamin. Lands near <b>RM19,000</b> before wang hantaran. Most items below the published ranges are my estimates, because the guides price full-size weddings.</span>
       <span>• A 2026 guide puts a Malay wedding at about <b>RM30,000–RM80,000</b>. Catering is about 35–50% of the total.</span>
       <span>• A UMK professor puts Malaysian weddings overall at <b>RM50,000–RM200,000</b>. Sources disagree, and none state their method.</span>
       <span>• The biggest lever is guest count. Each 100 guests at RM45 per pax is RM4,500 of catering, plus door gifts.</span>
@@ -417,43 +421,46 @@ tfoot tr.grand td { font-family: var(--display); font-weight: 400; font-size: 1.
 
   /* ---------- budget ---------- */
   // [id, group, label, basis, values per tier, tag, note]
-  var GUESTS = [300, 600, 1000];
+  // Tiers: 0 Kecil (family & friends), 1 Jimat, 2 Sederhana
+  var GUESTS = [150, 300, 600];
   var items = [
-    ["catering", "Reception", "Catering", "pax", [25, 45, 80], "src", "Guide: RM38–130/pax buffet; RM80/pax anecdote; basic caterers from ~RM18"],
-    ["venue", "Reception", "Venue / hall / canopy", "flat", [1000, 1800, 15000], "src", "Community hall RM400–1,800; hotel ballroom RM5,000–30,000"],
-    ["decor", "Reception", "Pelamin, decor, flowers", "flat", [3000, 7000, 15000], "src", "Guide: RM3,000–15,000"],
-    ["doorgift", "Reception", "Door gifts / bunga telur", "pax", [1.5, 3, 6], "est", ""],
-    ["invite", "Reception", "Invitations (kad / digital)", "flat", [200, 800, 2500], "est", ""],
-    ["attire", "Couple", "Attire, both, all events", "flat", [2000, 4500, 8000], "src", "Guide: RM2,000–8,000"],
-    ["andam", "Couple", "Mak andam (makeup and styling)", "flat", [1000, 2500, 5000], "est", ""],
-    ["photo", "Couple", "Photo and video", "flat", [3000, 6000, 10000], "src", "Guide: RM3,000–10,000"],
-    ["rings", "Couple", "Rings", "flat", [1500, 3000, 6000], "est", ""],
-    ["wang", "Adat", "Wang hantaran", "flat", [8000, 15000, 25000], "est", "Agreed between families. No reliable published average found"],
-    ["trays", "Adat", "Hantaran gifts and gubahan trays", "flat", [3000, 7000, 12000], "src", "Guide: RM5,000–10,000; KL RM10,000–15,000+"],
-    ["mas", "Adat", "Mas kahwin", "flat", [100, 300, 1000], "ver", "Minimum set by each state (Pahang raised to RM100). Check your state"],
-    ["tunang", "Adat", "Bertunang event", "flat", [1500, 3000, 6000], "est", ""],
-    ["akad", "Adat", "Akad nikah and berinai", "flat", [1000, 2500, 5000], "est", ""],
+    ["catering", "Reception", "Catering", "pax", [30, 30, 45], "src", "Guide: RM38–130/pax wedding buffet; basic caterers from ~RM18. Kecil RM30 is my estimate"],
+    ["venue", "Reception", "Venue: home, surau hall or community hall", "flat", [1000, 1000, 1800], "src", "Community hall RM400–1,800. At home, this covers canopy, tables and chairs"],
+    ["decor", "Reception", "Pelamin and decor", "flat", [1500, 3000, 7000], "est", "Full decor guide: RM3,000–15,000. Kecil assumes a mini pelamin or photo backdrop"],
+    ["doorgift", "Reception", "Door gifts / bunga telur", "pax", [2, 1.5, 3], "est", ""],
+    ["invite", "Reception", "Invitations", "flat", [100, 200, 800], "est", "Kecil assumes a digital card sent by WhatsApp"],
+    ["attire", "Couple", "Wedding dress and baju Melayu (both, all events)", "flat", [2000, 2000, 4500], "src", "Guide: RM2,000–8,000. Rent the sanding outfit, tailor the nikah one"],
+    ["andam", "Couple", "Mak andam (makeup and styling)", "flat", [1000, 1000, 2500], "est", ""],
+    ["photo", "Couple", "Photographer", "flat", [2000, 3000, 6000], "est", "Guide: RM3,000–10,000 for full coverage. Kecil assumes half day, photos only"],
+    ["rings", "Couple", "Rings", "flat", [1500, 1500, 3000], "est", ""],
+    ["wang", "Adat", "Wang hantaran", "flat", [8000, 8000, 15000], "est", "Agreed between families. No reliable published average found"],
+    ["trays", "Adat", "Hantaran gifts and gubahan trays", "flat", [2000, 3000, 7000], "est", "Guide: RM5,000–10,000. Kecil assumes 5–7 trays, partly DIY"],
+    ["mas", "Adat", "Mas kahwin", "flat", [300, 300, 300], "ver", "Minimum set by each state (Pahang raised to RM100). Check your state"],
+    ["tunang", "Adat", "Bertunang event", "flat", [0, 1500, 3000], "est", "Kecil: a small family visit, or skip"],
+    ["akad", "Adat", "Akad nikah (masjid) and berinai", "flat", [800, 1000, 2500], "est", ""],
     ["admin", "Paperwork", "Kursus, HIV test, nikah fees", "flat", [300, 300, 300], "ver", "Fees vary by state. Check JAIN / SPPIM"]
   ];
   var tagText = { src: "Sourced range", est: "Estimate", ver: "⚠️ Verify" };
-  var b = store.budget || null;
-  function tierValues(t) { var v = {}; items.forEach(function (it) { v[it[0]] = it[4][t]; }); return { tier: t, guests: GUESTS[t], v: v }; }
-  if (!b) b = tierValues(1);
+  var b = store.budget2 || null;
+  function tierValues(t) { var v = {}; items.forEach(function (it) { v[it[0]] = it[4][t]; }); return { tier: t, guests: GUESTS[t], v: v, off: {} }; }
+  if (!b) b = tierValues(0);
+  if (!b.off) b.off = {};
 
   function setTierButtons() {
     Array.prototype.forEach.call($("tierSeg").querySelectorAll("button"), function (btn) { btn.setAttribute("aria-pressed", String(+btn.dataset.tier === b.tier)); });
   }
   function budgetTotals() {
     var lines = {}, sub = 0;
-    items.forEach(function (it) { var amt = +b.v[it[0]] || 0; var t = it[3] === "pax" ? amt * b.guests : amt; lines[it[0]] = t; sub += t; });
+    items.forEach(function (it) { var amt = +b.v[it[0]] || 0; var t = it[3] === "pax" ? amt * b.guests : amt; if (b.off[it[0]]) t = 0; lines[it[0]] = t; sub += t; });
     var cont = sub * 0.1;
     return { lines: lines, sub: sub, cont: cont, total: sub + cont, noWang: (sub - lines.wang) * 1.1 };
   }
   function renderBudgetTable() {
     var html = "", group = "";
     items.forEach(function (it) {
-      if (it[1] !== group) { group = it[1]; html += '<tr class="group"><td colspan="5">' + group + "</td></tr>"; }
-      html += "<tr><td>" + it[2] + (it[6] ? '<div class="note">' + it[6] + "</div>" : "") + "</td>" +
+      if (it[1] !== group) { group = it[1]; html += '<tr class="group"><td colspan="6">' + group + "</td></tr>"; }
+      var off = !!b.off[it[0]];
+      html += '<tr' + (off ? ' class="off"' : "") + '><td><input type="checkbox" id="use-' + it[0] + '" data-use="' + it[0] + '"' + (off ? "" : " checked") + ' aria-label="Include ' + it[2] + '"></td><td>' + it[2] + (it[6] ? '<div class="note">' + it[6] + "</div>" : "") + "</td>" +
         "<td class=\"small muted\">" + (it[3] === "pax" ? "per guest" : "lump sum") + "</td>" +
         '<td class="r"><input type="number" min="0" step="' + (it[3] === "pax" ? "0.5" : "100") + '" id="amt-' + it[0] + '" data-id="' + it[0] + '" value="' + b.v[it[0]] + '" aria-label="' + it[2] + ' amount"></td>' +
         '<td class="r" id="line-' + it[0] + '"></td><td><span class="tag ' + it[5] + '">' + tagText[it[5]] + "</span></td></tr>";
@@ -476,17 +483,22 @@ tfoot tr.grand td { font-family: var(--display); font-weight: 400; font-size: 1.
       var pct = t.sub ? Math.round(groups[k] / t.sub * 100) : 0;
       return '<div class="bar"><span>' + k + ' <span class="muted">' + pct + '%</span></span><div class="track"><div class="fill" style="width:' + (groups[k] / max * 100) + '%"></div></div><span class="amt">' + rm(groups[k]) + "</span></div>";
     }).join("");
-    var names = ["Jimat", "Sederhana", "Mewah"];
+    var names = ["Kecil", "Jimat", "Sederhana"];
     $("sumBudget").textContent = rm(t.total);
     $("sumTier").textContent = (b.tier === null ? "Custom" : names[b.tier]) + " · " + b.guests.toLocaleString("en-MY") + " guests";
   }
+  $("budgetBody").addEventListener("change", function (e) {
+    var u = e.target.dataset && e.target.dataset.use; if (!u) return;
+    b.off[u] = !e.target.checked; e.target.closest("tr").classList.toggle("off", !e.target.checked);
+    b.tier = null; setTierButtons(); store.budget2 = b; save(); renderBudgetNumbers();
+  });
   $("budgetBody").addEventListener("input", function (e) {
     var id = e.target.dataset && e.target.dataset.id; if (!id) return;
-    b.v[id] = Math.max(0, +e.target.value || 0); b.tier = null; setTierButtons(); store.budget = b; save(); renderBudgetNumbers();
+    b.v[id] = Math.max(0, +e.target.value || 0); b.tier = null; setTierButtons(); store.budget2 = b; save(); renderBudgetNumbers();
   });
-  $("guests").addEventListener("input", function () { b.guests = Math.max(0, Math.round(+$("guests").value || 0)); b.tier = null; setTierButtons(); store.budget = b; save(); renderBudgetNumbers(); });
-  $("tierSeg").addEventListener("click", function (e) { var t = e.target.closest("button"); if (!t) return; b = tierValues(+t.dataset.tier); store.budget = b; save(); renderBudgetTable(); renderBudgetNumbers(); });
-  $("resetBudget").addEventListener("click", function () { b = tierValues(b.tier === null ? 1 : b.tier); store.budget = b; save(); renderBudgetTable(); renderBudgetNumbers(); });
+  $("guests").addEventListener("input", function () { b.guests = Math.max(0, Math.round(+$("guests").value || 0)); b.tier = null; setTierButtons(); store.budget2 = b; save(); renderBudgetNumbers(); });
+  $("tierSeg").addEventListener("click", function (e) { var t = e.target.closest("button"); if (!t) return; b = tierValues(+t.dataset.tier); store.budget2 = b; save(); renderBudgetTable(); renderBudgetNumbers(); });
+  $("resetBudget").addEventListener("click", function () { b = tierValues(b.tier === null ? 0 : b.tier); store.budget2 = b; save(); renderBudgetTable(); renderBudgetNumbers(); });
 
   /* ---------- palettes ---------- */
   var palettes = [
