@@ -222,9 +222,10 @@ tfoot tr.grand td { font-family: var(--display); font-weight: 400; font-size: 1.
     </div>
     <div class="row">
       <div class="seg" role="group" aria-label="Budget level" id="tierSeg">
-        <button type="button" data-tier="0">Kecil (family &amp; friends)</button>
-        <button type="button" data-tier="1">Jimat (simple)</button>
-        <button type="button" data-tier="2">Sederhana (mid)</button>
+        <button type="button" data-tier="0">Intimate (close family)</button>
+        <button type="button" data-tier="1">Kecil (family &amp; friends)</button>
+        <button type="button" data-tier="2">Jimat (simple)</button>
+        <button type="button" data-tier="3">Sederhana (mid)</button>
       </div>
       <label class="f" for="guests">Guests (pax)
         <input type="number" id="guests" min="0" step="50" style="width:110px">
@@ -249,6 +250,7 @@ tfoot tr.grand td { font-family: var(--display); font-weight: 400; font-size: 1.
     </div>
     <div class="card small" style="display:grid;gap:6px">
       <b>What the research says</b>
+      <span>• <b>Intimate:</b> about 50 close family. Nikah at the masjid, then lunch at home or a restaurant room. No pelamin, one outfit each. Lands near <b>RM9,800</b> before wang hantaran. ⚠️ Ask your masjid about booking rules and fees.</span>
       <span>• <b>Small wedding (Kecil):</b> about 150 family and friends, home or community hall, mini pelamin. Lands near <b>RM19,000</b> before wang hantaran. Most items below the published ranges are my estimates, because the guides price full-size weddings.</span>
       <span>• A 2026 guide puts a Malay wedding at about <b>RM30,000–RM80,000</b>. Catering is about 35–50% of the total.</span>
       <span>• A UMK professor puts Malaysian weddings overall at <b>RM50,000–RM200,000</b>. Sources disagree, and none state their method.</span>
@@ -421,27 +423,27 @@ tfoot tr.grand td { font-family: var(--display); font-weight: 400; font-size: 1.
 
   /* ---------- budget ---------- */
   // [id, group, label, basis, values per tier, tag, note]
-  // Tiers: 0 Kecil (family & friends), 1 Jimat, 2 Sederhana
-  var GUESTS = [150, 300, 600];
+  // Tiers: 0 Intimate (close family), 1 Kecil (family & friends), 2 Jimat, 3 Sederhana
+  var GUESTS = [50, 150, 300, 600];
   var items = [
-    ["catering", "Reception", "Catering", "pax", [30, 30, 45], "src", "Guide: RM38–130/pax wedding buffet; basic caterers from ~RM18. Kecil RM30 is my estimate"],
-    ["venue", "Reception", "Venue: home, surau hall or community hall", "flat", [1000, 1000, 1800], "src", "Community hall RM400–1,800. At home, this covers canopy, tables and chairs"],
-    ["decor", "Reception", "Pelamin and decor", "flat", [1500, 3000, 7000], "est", "Full decor guide: RM3,000–15,000. Kecil assumes a mini pelamin or photo backdrop"],
-    ["doorgift", "Reception", "Door gifts / bunga telur", "pax", [2, 1.5, 3], "est", ""],
-    ["invite", "Reception", "Invitations", "flat", [100, 200, 800], "est", "Kecil assumes a digital card sent by WhatsApp"],
-    ["attire", "Couple", "Wedding dress and baju Melayu (both, all events)", "flat", [2000, 2000, 4500], "src", "Guide: RM2,000–8,000. Rent the sanding outfit, tailor the nikah one"],
-    ["andam", "Couple", "Mak andam (makeup and styling)", "flat", [1000, 1000, 2500], "est", ""],
-    ["photo", "Couple", "Photographer", "flat", [2000, 3000, 6000], "est", "Guide: RM3,000–10,000 for full coverage. Kecil assumes half day, photos only"],
-    ["rings", "Couple", "Rings", "flat", [1500, 1500, 3000], "est", ""],
-    ["wang", "Adat", "Wang hantaran", "flat", [8000, 8000, 15000], "est", "Agreed between families. No reliable published average found"],
-    ["trays", "Adat", "Hantaran gifts and gubahan trays", "flat", [2000, 3000, 7000], "est", "Guide: RM5,000–10,000. Kecil assumes 5–7 trays, partly DIY"],
-    ["mas", "Adat", "Mas kahwin", "flat", [300, 300, 300], "ver", "Minimum set by each state (Pahang raised to RM100). Check your state"],
-    ["tunang", "Adat", "Bertunang event", "flat", [0, 1500, 3000], "est", "Kecil: a small family visit, or skip"],
-    ["akad", "Adat", "Akad nikah (masjid) and berinai", "flat", [800, 1000, 2500], "est", ""],
-    ["admin", "Paperwork", "Kursus, HIV test, nikah fees", "flat", [300, 300, 300], "ver", "Fees vary by state. Check JAIN / SPPIM"]
+    ["catering", "Reception", "Catering / lunch", "pax", [40, 30, 30, 45], "src", "Guide: RM38–130/pax wedding buffet; basic caterers from ~RM18. Intimate RM40 assumes a restaurant room or small home order (my estimate)"],
+    ["venue", "Reception", "Venue: home, surau hall or community hall", "flat", [0, 1000, 1000, 1800], "src", "Community hall RM400–1,800. Intimate: home or restaurant, no hire fee"],
+    ["decor", "Reception", "Pelamin and decor", "flat", [500, 1500, 3000, 7000], "est", "Full decor guide: RM3,000–15,000. Intimate: flowers and a backdrop, no pelamin"],
+    ["doorgift", "Reception", "Door gifts / bunga telur", "pax", [3, 2, 1.5, 3], "est", ""],
+    ["invite", "Reception", "Invitations", "flat", [0, 100, 200, 800], "est", "Intimate: invite personally by phone or WhatsApp"],
+    ["attire", "Couple", "Wedding dress and baju Melayu (both, all events)", "flat", [1500, 2000, 2000, 4500], "src", "Guide: RM2,000–8,000. Intimate: one outfit each, worn all day"],
+    ["andam", "Couple", "Mak andam (makeup and styling)", "flat", [600, 1000, 1000, 2500], "est", "Intimate: one look only"],
+    ["photo", "Couple", "Photographer", "flat", [1000, 2000, 3000, 6000], "est", "Guide: RM3,000–10,000 for full coverage. Intimate: 2–3 hours, nikah only"],
+    ["rings", "Couple", "Rings", "flat", [1500, 1500, 1500, 3000], "est", ""],
+    ["wang", "Adat", "Wang hantaran", "flat", [8000, 8000, 8000, 15000], "est", "Agreed between families. No reliable published average found"],
+    ["trays", "Adat", "Hantaran gifts and gubahan trays", "flat", [800, 2000, 3000, 7000], "est", "Guide: RM5,000–10,000. Intimate: 3–5 trays, DIY"],
+    ["mas", "Adat", "Mas kahwin", "flat", [300, 300, 300, 300], "ver", "Minimum set by each state (Pahang raised to RM100). Check your state"],
+    ["tunang", "Adat", "Bertunang event", "flat", [0, 0, 1500, 3000], "est", "Small weddings: a short family visit, or skip"],
+    ["akad", "Adat", "Akad nikah (masjid) and berinai", "flat", [300, 800, 1000, 2500], "ver", "Masjid booking and jurunikah fees vary. Ask your masjid"],
+    ["admin", "Paperwork", "Kursus, HIV test, nikah fees", "flat", [300, 300, 300, 300], "ver", "Fees vary by state. Check JAIN / SPPIM"]
   ];
   var tagText = { src: "Sourced range", est: "Estimate", ver: "⚠️ Verify" };
-  var b = store.budget2 || null;
+  var b = store.budget3 || null;
   function tierValues(t) { var v = {}; items.forEach(function (it) { v[it[0]] = it[4][t]; }); return { tier: t, guests: GUESTS[t], v: v, off: {} }; }
   if (!b) b = tierValues(0);
   if (!b.off) b.off = {};
@@ -483,22 +485,22 @@ tfoot tr.grand td { font-family: var(--display); font-weight: 400; font-size: 1.
       var pct = t.sub ? Math.round(groups[k] / t.sub * 100) : 0;
       return '<div class="bar"><span>' + k + ' <span class="muted">' + pct + '%</span></span><div class="track"><div class="fill" style="width:' + (groups[k] / max * 100) + '%"></div></div><span class="amt">' + rm(groups[k]) + "</span></div>";
     }).join("");
-    var names = ["Kecil", "Jimat", "Sederhana"];
+    var names = ["Intimate", "Kecil", "Jimat", "Sederhana"];
     $("sumBudget").textContent = rm(t.total);
     $("sumTier").textContent = (b.tier === null ? "Custom" : names[b.tier]) + " · " + b.guests.toLocaleString("en-MY") + " guests";
   }
   $("budgetBody").addEventListener("change", function (e) {
     var u = e.target.dataset && e.target.dataset.use; if (!u) return;
     b.off[u] = !e.target.checked; e.target.closest("tr").classList.toggle("off", !e.target.checked);
-    b.tier = null; setTierButtons(); store.budget2 = b; save(); renderBudgetNumbers();
+    b.tier = null; setTierButtons(); store.budget3 = b; save(); renderBudgetNumbers();
   });
   $("budgetBody").addEventListener("input", function (e) {
     var id = e.target.dataset && e.target.dataset.id; if (!id) return;
-    b.v[id] = Math.max(0, +e.target.value || 0); b.tier = null; setTierButtons(); store.budget2 = b; save(); renderBudgetNumbers();
+    b.v[id] = Math.max(0, +e.target.value || 0); b.tier = null; setTierButtons(); store.budget3 = b; save(); renderBudgetNumbers();
   });
-  $("guests").addEventListener("input", function () { b.guests = Math.max(0, Math.round(+$("guests").value || 0)); b.tier = null; setTierButtons(); store.budget2 = b; save(); renderBudgetNumbers(); });
-  $("tierSeg").addEventListener("click", function (e) { var t = e.target.closest("button"); if (!t) return; b = tierValues(+t.dataset.tier); store.budget2 = b; save(); renderBudgetTable(); renderBudgetNumbers(); });
-  $("resetBudget").addEventListener("click", function () { b = tierValues(b.tier === null ? 0 : b.tier); store.budget2 = b; save(); renderBudgetTable(); renderBudgetNumbers(); });
+  $("guests").addEventListener("input", function () { b.guests = Math.max(0, Math.round(+$("guests").value || 0)); b.tier = null; setTierButtons(); store.budget3 = b; save(); renderBudgetNumbers(); });
+  $("tierSeg").addEventListener("click", function (e) { var t = e.target.closest("button"); if (!t) return; b = tierValues(+t.dataset.tier); store.budget3 = b; save(); renderBudgetTable(); renderBudgetNumbers(); });
+  $("resetBudget").addEventListener("click", function () { b = tierValues(b.tier === null ? 0 : b.tier); store.budget3 = b; save(); renderBudgetTable(); renderBudgetNumbers(); });
 
   /* ---------- palettes ---------- */
   var palettes = [

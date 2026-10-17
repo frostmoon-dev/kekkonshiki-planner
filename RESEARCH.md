@@ -60,6 +60,7 @@ Not found in any reliable source: wang hantaran averages, mak andam, door gifts,
 
 | Level | Guests | Catering/pax | Total | Without wang hantaran |
 |---|---|---|---|---|
+| Intimate (close family) | 50 | RM40 | ~RM18,600 | ~RM9,800 |
 | Kecil (family & friends) | 150 | RM30 | ~RM27,800 | ~RM19,000 |
 | Jimat | 300 | RM30 | ~RM38,800 | ~RM30,000 |
 | Sederhana | 600 | RM45 | ~RM90,800 | ~RM74,300 |
